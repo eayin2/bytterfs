@@ -3,7 +3,7 @@ bytterfs
 
 ####  Usage description
 usage: bytterfs.py [-h] -p SSHPORT -i SSHKEY -dk DESTKEEP<br>
-                   snapshotName source destRootSubvol destContainer sshHost<br><br>
+                   snapshotName source destRootSubvol destContainer sshHost<br>
 
 bytterfs. Incremental Backup helper for btrfs send/receive over SSH. Make sure<br>
 that the SSH user has added following sudo rights in /etc/sudoers<br>
