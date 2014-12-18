@@ -61,6 +61,13 @@ Before using this backup script you should prepare following things:<br>
    username ALL=NOPASSWD: /usr/bin/btrfs subvol list*<br>
    to /etc/sudoers<br><br>
 
+#### Requirements: <br>
+- btrfs-utils
+- qymail script (https://github.com/eayin2/gymail) 
+  --> Notice: Create a symlink to /usr/local/bin/sendmail.py for the script. `ln -s /path/script /usr/local/bin/sendmail.py`
+  (If you dont want to use it then just remove all sendmail lines)
+- python3
+
 #### Notice:<br>
 - This script only supports btrfs send/receive operations from a local to an SSH remote machine.<br>
 - Only one snapshot is kept on the client and only the destination will hold multiple snapshots<br>
