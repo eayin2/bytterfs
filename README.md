@@ -61,10 +61,10 @@ optional arguments:<br>
 
 #### Preparations:<br>
 Before using this backup script you should prepare following things:<br>
-1. Create a subvolume on the backup destination, which will hold/contain the <br>
+- Create a subvolume on the backup destination, which will hold/contain the <br>
    Backups/Snapshots. E.g. /mnt/3tb/@rootfs/  which will then hold e.g. backups as <br>
    such: /mnt/3tb/@rootfs/@rootfs_1418932376   <br>
-2. If you don't use root to connect to your backup destination (which is recommended,  <br>
+- If you don't use root to connect to your backup destination (which is recommended,  <br>
    because if you many clients accessing your backup destination you would increase  <br>
    the risk for a rogue client), then you have to add: <br>
    username ALL=NOPASSWD: /usr/bin/btrfs subvol delete*<br>
@@ -86,4 +86,6 @@ Before using this backup script you should prepare following things:<br>
   store multiple snapshots on my client.<br>
 
 #### Example Usage: <br>
-sudo ./bytterfs.py @home /home/ /mnt/3tb/ /mnt/3tb/@home/ user@192.168.1.100 -p 22 -i /home/user/.ssh/id_rsa -dk 1m=6,4m=6,10=5 <br>
+```
+sudo ./bytterfs.py @home /home/ /mnt/3tb/ /mnt/3tb/@home/ user@192.168.1.100 -p 22 -i /home/user/.ssh/id_rsa -dk 1m=6,4m=6,10=5
+```<br>
