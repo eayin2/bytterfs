@@ -1,6 +1,7 @@
 bytterfs
 ========
 
+####  Usage description
 usage: bytterfs.py [-h] -p SSHPORT -i SSHKEY -dk DESTKEEP<br>
                    snapshotName source destRootSubvol destContainer sshHost<br><br>
 
@@ -8,7 +9,7 @@ bytterfs. Incremental Backup helper for btrfs send/receive over SSH. Make sure<b
 that the SSH user has added following sudo rights in /etc/sudoers<br><br>
 
 username ALL=NOPASSWD: /usr/bin/btrfs subvol delete*<br>
-username ALL=NOPASSWD: /usr/bin/btrfs subvol list*<br><br>
+username ALL=NOPASSWD: /usr/bin/btrfs subvol list*<br>
 
 This way you can run latter commands with sudo and don't have to type in the<br>
 password. This is more secure, than connecting with SSH as root to the<br>
@@ -46,7 +47,7 @@ optional arguments:<br>
                         of snapshots>optional(<comma as delimiter>)... Notice<br>
                         that the next specified time span has to be greater<br>
                         than the previous, else the parameter will yield an<br>
-                        error.<br><br><br>
+                        error.<br><br>
                         
 
 #### Preparations:<br>
