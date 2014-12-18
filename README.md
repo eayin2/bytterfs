@@ -57,7 +57,7 @@ optional arguments:<br>
 - Rotating snapshots on backup destination
 - syslog Logging
 - lockfile for interrupted backups and trying to fix interrupted backups next run
-- mail notification, requires gymail. see: (https://github.com/eayin2/gymail) 
+- mail notification, requires gymail. see: (https://github.com/eayin2/gymail) <br>
 
 #### Preparations:<br>
 Before using this backup script you should prepare following things:<br>
@@ -69,14 +69,14 @@ Before using this backup script you should prepare following things:<br>
    the risk for a rogue client), then you have to add: <br>
    username ALL=NOPASSWD: /usr/bin/btrfs subvol delete*<br>
    username ALL=NOPASSWD: /usr/bin/btrfs subvol list*<br>
-   to /etc/sudoers<br><br>
+   to /etc/sudoers<br>
 
 #### Requirements: <br>
 - btrfs-utils
 - qymail script (https://github.com/eayin2/gymail) 
   --> Notice: Create a symlink to /usr/local/bin/sendmail.py for the script. `ln -s /path/script /usr/local/bin/sendmail.py`
   (If you dont want to use it then just remove all sendmail lines)
-- python3
+- python3<br>
 
 #### Notice:<br>
 - This script only supports btrfs send/receive operations from a local to an SSH remote machine.<br>
