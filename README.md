@@ -49,7 +49,7 @@ optional arguments:<br>
                         that the next specified time span has to be greater<br>
                         than the previous, else the parameter will yield an<br>
                         error.<br><br>
-              ```          
+```          
 
 #### Preparations:<br>
 Before using this backup script you should prepare following things:<br>
