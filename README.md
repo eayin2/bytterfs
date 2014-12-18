@@ -1,5 +1,7 @@
 bytterfs
 ========
+Bytterfs - shortel for Backup python Butterfs - is a backup script using btrfs send/receive feature to incrementally backup
+via SSH to a remote server.
 
 ####  Usage description
 ```
@@ -50,6 +52,12 @@ optional arguments:<br>
                         than the previous, else the parameter will yield an<br>
                         error.<br><br>
 ```          
+
+#### Features:
+- Rotating snapshots on backup destination
+- syslog Logging
+- lockfile for interrupted backups and trying to fix interrupted backups next run
+- mail notification, requires gymail. see: (https://github.com/eayin2/gymail) 
 
 #### Preparations:<br>
 Before using this backup script you should prepare following things:<br>
