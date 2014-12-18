@@ -6,7 +6,7 @@ usage: bytterfs.py [-h] -p SSHPORT -i SSHKEY -dk DESTKEEP<br>
                    snapshotName source destRootSubvol destContainer sshHost<br><br>
 
 bytterfs. Incremental Backup helper for btrfs send/receive over SSH. Make sure<br>
-that the SSH user has added following sudo rights in /etc/sudoers<br><br>
+that the SSH user has added following sudo rights in /etc/sudoers<br>
 
 username ALL=NOPASSWD: /usr/bin/btrfs subvol delete*<br>
 username ALL=NOPASSWD: /usr/bin/btrfs subvol list*<br>
