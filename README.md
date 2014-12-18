@@ -14,7 +14,7 @@ username ALL=NOPASSWD: /usr/bin/btrfs subvol list*<br>
 This way you can run latter commands with sudo and don't have to type in the<br>
 password. This is more secure, than connecting with SSH as root to the<br>
 destination server. Also make sure that you have already created a subvolume on<br>
-the backup destination which holds all your backup for the specific source. <br><br>
+the backup destination which holds all your backup for the specific source. <br>
 
 positional arguments:<br>
   snapshotName          Name of snapshot. A timestamp will then be suffixed to<br>
@@ -25,7 +25,7 @@ positional arguments:<br>
                         existent on the destination root subvolume.<br>
   destContainer         Destination container subvolume path, where snapshots<br>
                         are send to.<br>
-  sshHost               E.g.: user@192.168.1.100.<br><br>
+  sshHost               E.g.: user@192.168.1.100.<br>
 
 optional arguments:<br>
   -h, --help            show this help message and exit<br>
