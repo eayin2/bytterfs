@@ -1,6 +1,6 @@
 bytterfs
 ========
-Bytterfs - shortel for Backup python Butterfs - is a backup script using btrfs send/receive feature to incrementally backup
+Bytterfs - shortel for Backup python Butterfs - is a backup script using btrfs send/receive features to incrementally backup
 via SSH to a remote server.
 
 ####  Usage description
