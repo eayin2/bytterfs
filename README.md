@@ -74,3 +74,6 @@ Before using this backup script you should prepare following things:<br>
   (see parameter syntax infos above). You can modify/extend this script to store more than one<br>
   snapshot on the client. I did not do it, because I use an SSD on my client and don't want to<br>
   store multiple snapshots on my client.<br>
+
+#### Example Usage: <br>
+sudo ./bytterfs.py @home /home/ /mnt/3tb/ /mnt/3tb/@home/ user@192.168.1.100 -p 22 -i /home/user/.ssh/id_rsa -dk 1m=6,4m=6,10=5 <br>
