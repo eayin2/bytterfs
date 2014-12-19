@@ -65,8 +65,8 @@ Before using this backup script you should prepare following things:<br>
    Backups/Snapshots. E.g. /mnt/3tb/@rootfs/  which will then hold e.g. backups as <br>
    such: /mnt/3tb/@rootfs/@rootfs_1418932376   <br>
 - If you don't use root to connect to your backup destination (which is recommended,  <br>
-   because if you have many clients accessing your backup destination you increase  <br>
-   the risk for a rogue client), then you have to add permission in /etc/sudoers to run <br>
+   because if you have many clients accessing your backup destination, you increase  <br>
+   the risk for a rogue client), then you have to add permissions in /etc/sudoers to run <br>
    `btrfs subvol delete*` and `btrfs subvol subvol list*` without password requests. E.g.:<br>
    username ALL=NOPASSWD: /usr/bin/btrfs subvol delete*<br>
    username ALL=NOPASSWD: /usr/bin/btrfs subvol list*<br>
