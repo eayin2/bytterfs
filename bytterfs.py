@@ -74,7 +74,7 @@ def evenSpread(sequence, num):
         yield sequence[int(ceil(i * length / num))]
 
 def sendmail(event, subject, message):
-    p = Popen(["/usr/local/bin/sendmail.py", "-e", event, "-s", subject, "-m", message], stdout=PIPE, stderr=PIPE)
+    p = Popen(["/usr/bin/gymail.py", "-e", event, "-s", subject, "-m", message], stdout=PIPE, stderr=PIPE)
     out, err = p.communicate()
 
 def checkPath(string):
@@ -485,7 +485,6 @@ logger.addHandler(ColoredConsoleHandler())  # logger.addHandler(logging.StreamHa
 log_syslog_handler = logging.handlers.SysLogHandler('/dev/log')  # /dev/log is the socket to log to syslog
 log_syslog_handler.setFormatter(logging.Formatter(app_name + '[%(process)d] %(message)s'))
 logger.addHandler(log_syslog_handler)
-logger.setLevel(logging.DEBUG)  # Later setting it back to INFO
 logger.info('%s v%s by %s' % (app_name, __version__, __author__))
 
 try:
@@ -509,6 +508,8 @@ try:
                                                               "are send to.")
     parser.add_argument('sshHost', type=str, help='E.g.: user@192.168.1.100.')
     parser.add_argument('-p', '--sshPort', type=str, help='SSH Port.', required=True)
+    parser.add_argument('-vv', '--debug', action='store_true', help='Log level: debug', required=False)
+    parser.add_argument('-v', '--info', action='store_true', help='Log level: info', required=False)
     parser.add_argument('-i', '--sshKey', type=str, help='Path to your private key for your SSH user.', required=True)
     parser.add_argument('-dk', '--destKeep', type=checkTimespan,
                         help="Maximum number of destination snapshots to keep for a specific amount of time. Syntax "
@@ -520,6 +521,12 @@ try:
                              "ts>optional(<comma as delimiter>)... Notice that the next specified time span has to be "
                              "greater than the previous, else the parameter will yield an error.", required=True)
     args = parser.parse_args()
+    if args.debug:
+        logger.setLevel(logging.DEBUG)
+    elif args.info:
+        logger.setLevel(logging.INFO)
+    else:
+        logger.setLevel(logging.ERROR)
     bytterfs = Bytterfs(args.snapshotName, args.source, args.destRootSubvol, args.destContainer,
                         args.destKeep, args.sshHost, args.sshPort, args.sshKey)
     bytterfs.run()
