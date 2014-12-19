@@ -65,11 +65,11 @@ Before using this backup script you should prepare following things:<br>
    Backups/Snapshots. E.g. /mnt/3tb/@rootfs/  which will then hold e.g. backups as <br>
    such: /mnt/3tb/@rootfs/@rootfs_1418932376   <br>
 - If you don't use root to connect to your backup destination (which is recommended,  <br>
-   because if you many clients accessing your backup destination you would increase  <br>
-   the risk for a rogue client), then you have to add: <br>
+   because if you have many clients accessing your backup destination you increase  <br>
+   the risk for a rogue client), then you have to add permission in /etc/sudoers to run <br>
+   `btrfs subvol delete*` and `btrfs subvol subvol list*` without password requests. E.g.:<br>
    username ALL=NOPASSWD: /usr/bin/btrfs subvol delete*<br>
    username ALL=NOPASSWD: /usr/bin/btrfs subvol list*<br>
-   to /etc/sudoers<br>
 
 #### Requirements: <br>
 - btrfs-utils
@@ -80,7 +80,7 @@ Before using this backup script you should prepare following things:<br>
 
 #### Notice:<br>
 - This script only supports btrfs send/receive operations from a local to an SSH remote machine.<br>
-- Only one snapshot is kept on the client and only the destination will hold multiple snapshots<br>
+- Only one snapshot is kept on the client, o only the destination will hold multiple snapshots<br>
   (see parameter syntax infos above). You can modify/extend this script to store more than one<br>
   snapshot on the client. I did not do it, because I use an SSD on my client and don't want to<br>
   store multiple snapshots on my client.<br>
