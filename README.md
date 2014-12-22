@@ -88,3 +88,7 @@ Before using this backup script you should prepare following things:<br>
 #### Example Usage: <br>
 `sudo ./bytterfs.py @home /home/ /mnt/3tb/ /mnt/3tb/@home/ user@192.168.1.100 -p 22 -i /home/user/.ssh/id_rsa -dk 1m=6,4m=6,10=5`
 <br>
+
+#### Missing Implementations: <br>
+- sendmail level within sendmail function. If sendmail level warning then send warning and error mails, if sendmail level   error, then send only error mails. Also change sendmail("error"..) to sendmail("warning",..) at unimportant   
+  notifications.
