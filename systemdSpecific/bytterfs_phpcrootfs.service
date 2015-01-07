@@ -1,0 +1,7 @@
+[Unit]
+Description=Bytterfs Backup Btrfs
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/bytterfs.py @phpcrootfs / /mnt/3tb/ /mnt/3tb/phil/pc/@phpcrootfs/ phbtrfs@192.168.2.16 -p 5255 -i /home/philipp/.ssh/carm/phPcCubox -dk 1m=10,4m=6,6m=2,12m=3 -vv
+

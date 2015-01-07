@@ -127,7 +127,7 @@ class Bytterfs:
         self.lockfile = "%s%s" % (self.source, "bytterfs.lock")
 
     def inc(self, newSnapshot, prevSnapshot):
-        logInfo("Creating /bytterfs.lockfile and beginning full backup.")
+        logInfo("Creating /bytterfs.lockfile and beginning incremental backup.")
         prevSnapshot = os.path.basename(os.path.normpath(prevSnapshot))
         logDebug("Snapshot with stripped path and appended source: %s%s" % (self.source, prevSnapshot))
         newSnapshot = os.path.basename(os.path.normpath(newSnapshot))
@@ -413,7 +413,7 @@ class Bytterfs:
         logDebug("timeKeepTupelList: %s" % timeKeepTupelList)
         destTsList = self.subvolSplitTsList(self.destSubvolList(withUUID=False))
         currentTs = time.time()
-        tsKeepTupeldict = defaultdict(list)
+        tsKeepTupeldict = defaultdict(list)  # easier to append elements to key
         logDebug("tsList: %s" % destTsList)
         for ts in destTsList:
             for index, element in enumerate(timeKeepTupelList, start=0):
@@ -480,11 +480,24 @@ class Bytterfs:
         self.initiateBackup()
 
 #### Initializing Logger
+
+
+
+
 logger = logging.getLogger()
+# Add ColoredConsoleHandler
 logger.addHandler(ColoredConsoleHandler())  # logger.addHandler(logging.StreamHandler(sys.stdout))
+# Add SysLogHandler
 log_syslog_handler = logging.handlers.SysLogHandler('/dev/log')  # /dev/log is the socket to log to syslog
 log_syslog_handler.setFormatter(logging.Formatter(app_name + '[%(process)d] %(message)s'))
 logger.addHandler(log_syslog_handler)
+# Add fileHandler
+logPath = "/var/log/"
+logFormatter = logging.Formatter("%(asctime)s [%(levelname)-5.5s]  %(message)s")
+fileHandler = logging.FileHandler("{0}/{1}.log".format(logPath, app_name))  # {0} and {1} used with format(logPath, fileName)
+fileHandler.setFormatter(logFormatter)
+logger.addHandler(fileHandler)
+
 logger.info('%s v%s by %s' % (app_name, __version__, __author__))
 
 try:
