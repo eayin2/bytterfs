@@ -5,7 +5,7 @@ via SSH to a remote server.
 
 ####  Usage description
 ```
-usage: bytterfs.py [-h] -p SSHPORT -i SSHKEY -dk DESTKEEP
+usage: bytterfs [-h] -p SSHPORT -i SSHKEY -dk DESTKEEP
                    snapshotName source destRootSubvol destContainer sshHost
 
 bytterfs. Incremental Backup helper for btrfs send/receive over SSH. Make sure
@@ -86,7 +86,7 @@ Before using this backup script you should prepare following things:<br>
   store multiple snapshots on my client.<br>
 
 #### Example Usage: <br>
-`sudo ./bytterfs.py @home /home/ /mnt/3tb/ /mnt/3tb/@home/ user@192.168.1.100 -p 22 -i /home/user/.ssh/id_rsa -dk 1m=6,4m=6,10=5`
+`sudo ./bytterfs @home /home/ /mnt/3tb/ /mnt/3tb/@home/ user@192.168.1.100 -p 22 -i /home/user/.ssh/id_rsa -dk 1m=6,4m=6,10=5`
 <br>
 
 #### Missing Implementations: <br>
