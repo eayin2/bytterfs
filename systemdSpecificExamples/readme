@@ -1,0 +1,2 @@
+Examples systemd units. Edit them for your likings and Put them to /usr/lib/systemd/system/
+Don't forget to systemctl enable the timer unit when done. 
