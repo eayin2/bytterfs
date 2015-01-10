@@ -12,6 +12,7 @@ import time
 import re
 import copy
 import inspect
+import errno
 
 from math import ceil
 from subprocess import Popen, PIPE
@@ -67,6 +68,16 @@ def is_number(s):
         return True
     except ValueError:
         return False
+
+def mkdir_p(path):
+    try:
+        os.makedirs(path)
+    except OSError as exc:  # Python >2.5
+        if exc.errno == errno.EEXIST and os.path.isdir(path):
+            pass
+        else:
+            logError("Could not create directory")
+            raise
 
 def evenSpread(sequence, num):
     length = float(len(sequence))
@@ -480,10 +491,6 @@ class Bytterfs:
         self.initiateBackup()
 
 #### Initializing Logger
-
-
-
-
 logger = logging.getLogger()
 # Add ColoredConsoleHandler
 logger.addHandler(ColoredConsoleHandler())  # logger.addHandler(logging.StreamHandler(sys.stdout))
@@ -491,13 +498,6 @@ logger.addHandler(ColoredConsoleHandler())  # logger.addHandler(logging.StreamHa
 log_syslog_handler = logging.handlers.SysLogHandler('/dev/log')  # /dev/log is the socket to log to syslog
 log_syslog_handler.setFormatter(logging.Formatter(app_name + '[%(process)d] %(message)s'))
 logger.addHandler(log_syslog_handler)
-# Add fileHandler
-logPath = "/var/log/"
-logFormatter = logging.Formatter("%(asctime)s [%(levelname)-5.5s]  %(message)s")
-fileHandler = logging.FileHandler("{0}/{1}.log".format(logPath, app_name))  # {0} and {1} used with format(logPath, fileName)
-fileHandler.setFormatter(logFormatter)
-logger.addHandler(fileHandler)
-
 logger.info('%s v%s by %s' % (app_name, __version__, __author__))
 
 try:
@@ -534,6 +534,13 @@ try:
                              "ts>optional(<comma as delimiter>)... Notice that the next specified time span has to be "
                              "greater than the previous, else the parameter will yield an error.", required=True)
     args = parser.parse_args()
+    # Add fileHandler
+    logPath = "%s%s" % ("/var/log/", app_name)
+    mkdir_p(logPath)
+    logFormatter = logging.Formatter("%(asctime)s [%(levelname)-5.5s]  %(message)s")
+    fileHandler = logging.FileHandler("{0}/{1}.log".format(logPath, args.snapshotName))  # {0}{1} used with format(logPath,...)
+    fileHandler.setFormatter(logFormatter)
+    logger.addHandler(fileHandler)
     if args.debug:
         logger.setLevel(logging.DEBUG)
     elif args.info:
