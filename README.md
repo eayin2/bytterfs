@@ -3,6 +3,17 @@ bytterfs
 Bytterfs - shortel for Backup python Butterfs - is a backup script using btrfs send/receive features to incrementally backup
 via SSH to a remote server.
 
+#### Installation
+# From pypi:
+pip3 install bytterfs
+
+# From archlinux AUR:
+https://aur.archlinux.org/packages/bytterfs/
+
+# By hand:
+Just copy bytterfs.py to /usr/bin/ with:
+install -Dm755 bytterfs.py /usr/bin/bytterfs
+
 ####  Usage description
 ```
 usage: bytterfs [-h] -p SSHPORT -i SSHKEY -dk DESTKEEP
@@ -92,3 +103,10 @@ Before using this backup script you should prepare following things:<br>
 #### Missing Implementations: <br>
 - sendmail level within sendmail function. If sendmail level warning then send warning and error mails, if sendmail level   error, then send only error mails. Also change sendmail("error"..) to sendmail("warning",..) at unimportant   
   notifications.
+- Optionally a reimplementation to the server-client model with twisted SSL sockets and pipes, which is advantageous due to easier backup scheduling. I believe for 
+  2-3 backups/day it is not that essential yet.
+  https://twistedmatrix.com/documents/14.0.0/core/howto/servers.html
+  https://twistedmatrix.com/documents/14.0.0/core/howto/clients.html
+  https://twistedmatrix.com/documents/14.0.0/core/howto/ssl.html
+
+
