@@ -1,6 +1,6 @@
 # Maintainer: eayin2 <eayin2 at gmail dot com>
 pkgname="bytterfs"
-pkgver="0.2"
+pkgver="0.3"
 pkgrel=1
 pkgdesc="Backup script for btrfs send/receive"
 url="https://github.com/eayin2/bytterfs"
