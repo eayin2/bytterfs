@@ -4,15 +4,15 @@ Bytterfs - shortel for Backup python Butterfs - is a backup script using btrfs s
 via SSH to a remote server.
 
 #### Installation
-# From pypi:
-pip3 install bytterfs
-
-# From archlinux AUR:
+From pypi:
+`pip3 install bytterfs`
+<br>
+From archlinux AUR:
 https://aur.archlinux.org/packages/bytterfs/
-
-# By hand:
+<br>
+By hand:
 Just copy bytterfs.py to /usr/bin/ with:
-install -Dm755 bytterfs.py /usr/bin/bytterfs
+`install -Dm755 bytterfs.py /usr/bin/bytterfs`
 
 ####  Usage description
 ```
