@@ -539,8 +539,8 @@ class Bytterfs:
         path = os.path.abspath(localMntpoint)
         logDebug("%s %s" % (devPath, localMntpoint))
         if os.path.ismount(path):
-            logError("localMntpoint is already mounted. Exiting.")
-            sys.exit()
+            logError("localMntpoint is already mounted. Trying to unmount.")
+            self.destUmount()
         p1 = Popen(["sudo", "mount", "-t", "btrfs", "-o", "subvolid=0", devPath, localMntpoint], stdout=PIPE)
         out, err = p1.communicate()
         if p1.returncode != 0:
