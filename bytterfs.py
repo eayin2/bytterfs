@@ -504,8 +504,9 @@ class Bytterfs:
 
     def destSubvolID(self):
         container = os.path.abspath(self.destContainer)
-        strippedContainer = container.strip(self.destRootSubvol)
-        print(strippedContainer)
+        logDebug("container is:" + container)
+        strippedContainer = os.path.relpath(os.path.dirname(self.destContainer), os.path.dirname(self.destRootSubvol))
+        logDebug("stripedContainer is:" + strippedContainer)
         p1 = Popen(["sudo", "btrfs", "sub", "list", self.destRootSubvol], stdout=PIPE)
         out, err = p1.communicate()
         if p1.returncode != 0:
@@ -518,17 +519,20 @@ class Bytterfs:
             subvolCols = list()
             for col in row.split(" "):
                 subvolCols.append(col)
-            logDebug(subvolCols[8:][0])
-            if strippedContainer == subvolCols[8:][0]:
-                subvolID = subvolCols[1]
-                logDebug(subvolID)
-                break
+            logDebug("join(subvolCols[8:]) is: %s" % "".join(subvolCols[8:]))
+            if strippedContainer == "".join(subvolCols[8:]):
+                try:
+                    subvolID = subvolCols[1]
+                    logDebug(subvolID)
+                    break
+                except:
+                    pass
         if subvolID is None:
             logError("Didn't find subvolID for %s" % strippedContainer)
             sendmail("error", "Bytterfs", "Didn't find subvolID for %s" % strippedContainer)
             sys.exit(0)
         else:
-            print(subvolID)
+            logDebug(subvolID)
             return subvolID
 
     def destMountSubvol(self, devPath, localMntpoint):
@@ -572,7 +576,7 @@ class Bytterfs:
             logDebug("cols: %s" % cols)
             if cols[1] == subvolID:
                 logDebug(cols[1])
-                destMountedContainerPath = cols[8:][0]
+                destMountedContainerPath = "".join(cols[8:])
                 break
         logDebug(destMountedContainerPath)
         if destMountedContainerPath:
@@ -637,7 +641,7 @@ try:
     parser.add_argument('destContainer', type=checkPath, help="Destination container subvolume path, where snapshots "
                                                               "are send to.")
     parser.add_argument('-l', '--local', action='store_true', help='If this switch is used, then ssh parameters will be'
-                                                                   ' ignored and the backup transfer will run locally',
+                                                                   'ignored and the backup transfer will run locally',
                         required=False)
     parser.add_argument('-s', '--sshHost', type=str, help='E.g.: user@192.168.1.100.', required=False)
     parser.add_argument('-p', '--sshPort', type=str, help='SSH Port.', required=False)
