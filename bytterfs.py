@@ -637,7 +637,7 @@ try:
     parser.add_argument('destContainer', type=checkPath, help="Destination container subvolume path, where snapshots "
                                                               "are send to.")
     parser.add_argument('-l', '--local', action='store_true', help='If this switch is used, then ssh parameters will be'
-                                                                   'ignored and the backup transfer will run locally',
+                                                                   ' ignored and the backup transfer will run locally',
                         required=False)
     parser.add_argument('-s', '--sshHost', type=str, help='E.g.: user@192.168.1.100.', required=False)
     parser.add_argument('-p', '--sshPort', type=str, help='SSH Port.', required=False)

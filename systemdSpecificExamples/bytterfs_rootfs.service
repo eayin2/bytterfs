@@ -1,0 +1,7 @@
+[Unit]
+Description=Bytterfs Backup Btrfs
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/bytterfs @rootfs / /mnt/3tb/ /mnt/3tb/user/pc/@rootfs/ -s user@192.168.2.100 -p 8920 -i /home/user/.ssh/id_rsa -dk 1m=10,4m=6,6m=2,12m=3 -vv
+

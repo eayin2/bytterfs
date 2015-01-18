@@ -19,5 +19,5 @@ pkgver() {
 }
 package() {
     cd "${srcdir}/${pkgname}-${pkgver}"
-    install -Dm755 bytterfs "${pkgdir}"/usr/bin/bytterfs.py
+    install -Dm755 bytterfs.py "${pkgdir}"/usr/bin/bytterfs
 }
