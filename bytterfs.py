@@ -134,7 +134,10 @@ class Bytterfs:
         self.sshHost = sshHost
         self.sshPort = sshPort
         self.sshKey = sshKey
-        self.sshArgs = ["ssh", "-i", self.sshKey, "-p", self.sshPort, self.sshHost, "-t"]
+        if sshHost == None or sshPort == None or sshKey == None:
+            self.sshArgs = list()  # Workaround for empty list - will run subprocess locally.
+        else:
+            self.sshArgs = ["ssh", "-i", self.sshKey, "-p", self.sshPort, self.sshHost, "-t"]
         self.lockfile = "%s%s" % (self.source, "bytterfs.lock")
 
     def inc(self, newSnapshot, prevSnapshot):
@@ -161,6 +164,7 @@ class Bytterfs:
         logInfo('clientDeleteOlderSnapshots()')
         self.clientDeleteOlderSnapshots()
         logInfo('Backup %s created successfully' % self.snapshotName)
+        self.destUmount()
         exit(0)
 
     def full(self, snapshot):
@@ -184,16 +188,16 @@ class Bytterfs:
         logInfo('clientDeleteOlderSnapshotss()')
         self.clientDeleteOlderSnapshots()
         logInfo('Backup %s created successfully' % self.snapshotName)
+        self.destUmount()
         exit(0)
 
     def subvolSplitTsList(self, subvolList):
         tsList = []
         for subvol in subvolList:
             try:
-                tsList.append(subvol.split("_")[1])  ## was subvol[0] not sure why
+                tsList.append(subvol.split("_")[1])  # was subvol[0] not sure why
             except:
-                logError("There's a snapshot that has a wrong naming syntax. Exiting backup and sending mail.")
-                sendmail("error", "Bytterfs", "There's a snapshot that has a wrong naming syntax. Exiting backup.")
+                logWarning("There's a snapshot with a different naming syntax. Ignoring it.")
         return sorted(tsList)
 
     def isLockfile(self):
@@ -205,7 +209,7 @@ class Bytterfs:
                      "destination.\n")
             sendmail("error", "Bytterfs", "Lockfile found. Deleting possible left over on destination and continuing "
                      "with backup. See local syslog for more details.")
-            clientSubvolList = self.clientSubvolList(withUUID=False)  # verified that it's clean (doesnt contain \n or \r)
+            clientSubvolList = self.clientSubvolList(withUUID=False)
             clientTsList = self.subvolSplitTsList(clientSubvolList)
             destTsList = self.subvolSplitTsList(self.destSubvolList(withUUID=False))
             destLatestSnapshot = self.destLatestSnapshot()
@@ -255,7 +259,7 @@ class Bytterfs:
             elif len(clientSubvolList) > 1 and len(destTsList) == 0:
                 logWarning("Found more than one snapshot on client, but found no snapshot on dest.")
                 newSnapshot = self.clientCreateSnapshot()
-                # no need del redundant snapshots here, bcs later clientDeleteOlderSnapshots does that
+                # No need to del redundant snapshots here, bcs later clientDeleteOlderSnapshots take care of that.
                 self.full(newSnapshot)
             elif len(clientSubvolList) > 1 and len(destTsList) == 1:
                 logWarning("Found more than one snapshot on client and found one snapshot on dest.")
@@ -312,8 +316,7 @@ class Bytterfs:
                    " or none client subvolume." % smallestTsList)
         for subvolTs in smallestTsList:
             process = Popen(["sudo", "btrfs", "subvol", "delete", "%s%s_%s" % (self.source, self.snapshotName,
-                                                                               subvolTs)],
-                            stdout=PIPE, stderr=PIPE)
+                                                                               subvolTs)], stdout=PIPE, stderr=PIPE)
             out, err = process.communicate()
             logDebug("subprocess output: %s \nsubprocess error: %s" % (out, err))
             if process.returncode != 0:
@@ -332,10 +335,10 @@ class Bytterfs:
         splitRows = filter(None, splitRows)  # filters out empty list elements
         subvolList = []
         for row in splitRows:
-            splitLine = row.split(" ")  # if the subvol path contains spaces, it'll break the code.
+            splitLine = row.split(" ")
             subvolUUID = splitLine[8]
-            subvolName = splitLine[10]
-            if self.snapshotName in os.path.basename(os.path.normpath(subvolName)):   # Assuring to catch right subvol.
+            subvolName = "".join(splitLine[10:])  # slices will work for subvolNames with spaces
+            if self.snapshotName in os.path.basename(os.path.normpath(subvolName)):  # Assuring to catch right subvol.
                 if withUUID is True:
                     subvolList.append((subvolName, subvolUUID))
                 else:
@@ -371,13 +374,13 @@ class Bytterfs:
             sendmail("error", "Bytterfs", "Subprocess returncode != 0 for destSuvolList() method. Exiting Backup")
             exit(0)
         splitRows = out.decode('latin-1').split("\n")
-        splitRows = filter(None, splitRows)   # filters out empty list elements
+        splitRows = filter(None, splitRows)  # filters out empty list elements
         subvolList = []
         for row in splitRows:
-            splitLine = row.split(" ")   # if the subvol path contains spaces, it'll break the code.
+            splitLine = row.split(" ")
             subvolUUID = splitLine[8]
-            subvolName = splitLine[10]
-            if self.snapshotName in subvolName:   # Making sure to catch the right snapshots
+            subvolName = "".join(splitLine[10:])
+            if self.snapshotName in subvolName:  # Making sure to catch the right snapshots
                 if withUUID is True:
                     subvolList.append((subvolName.rstrip("\r"), subvolUUID))
                 else:
@@ -479,25 +482,139 @@ class Bytterfs:
                  "without `btrfs send -p` switch.")
         return False
 
+    def destDevPath(self):
+        p1 = Popen(["df", "-k", self.destRootSubvol], stdout=PIPE)
+        out, err = p1.communicate()
+        if p1.returncode != 0:
+            logError("Subprocess returncode != 0 for destDevPath() method. Exiting Backup.")
+            sendmail("error", "Bytterfs", "Subprocess returncode != 0 for destDevPath() method. Exiting Backup.")
+            sys.exit(0)
+        splitRows = out.decode('latin-1').split("\n")
+        destDevPath = None
+        for row in splitRows:
+            if "/dev/" in row and "%" in row:
+                line = row.split(" ")
+                destDevPath = line[0]
+        if destDevPath is None:
+            logError("Didn't find destDevPath for %s" % self.destRootSubvol)
+            sendmail("error", "Bytterfs", "Didn't find destDevPath for %s" % self.destRootSubvol)
+            sys.exit(0)
+        else:
+            return destDevPath
+
+    def destSubvolID(self):
+        container = os.path.abspath(self.destContainer)
+        strippedContainer = container.strip(self.destRootSubvol)
+        print(strippedContainer)
+        p1 = Popen(["sudo", "btrfs", "sub", "list", self.destRootSubvol], stdout=PIPE)
+        out, err = p1.communicate()
+        if p1.returncode != 0:
+            logError("Subprocess returncode != 0 for mountSubvol() method. Exiting Backup.")
+            sendmail("error", "Bytterfs", "Subprocess returncode != 0 for mountSubvol() method. Exiting Backup.")
+            sys.exit(0)
+        splitRows = out.decode('latin-1').split("\n")
+        subvolID = None
+        for row in splitRows:
+            subvolCols = list()
+            for col in row.split(" "):
+                subvolCols.append(col)
+            logDebug(subvolCols[8:][0])
+            if strippedContainer == subvolCols[8:][0]:
+                subvolID = subvolCols[1]
+                logDebug(subvolID)
+                break
+        if subvolID is None:
+            logError("Didn't find subvolID for %s" % strippedContainer)
+            sendmail("error", "Bytterfs", "Didn't find subvolID for %s" % strippedContainer)
+            sys.exit(0)
+        else:
+            print(subvolID)
+            return subvolID
+
+    def destMountSubvol(self, devPath, localMntpoint):
+        path = os.path.abspath(localMntpoint)
+        logDebug("%s %s" % (devPath, localMntpoint))
+        if os.path.ismount(path):
+            logError("localMntpoint is already mounted. Exiting.")
+            sys.exit()
+        p1 = Popen(["sudo", "mount", "-t", "btrfs", "-o", "subvolid=0", devPath, localMntpoint], stdout=PIPE)
+        out, err = p1.communicate()
+        if p1.returncode != 0:
+            logError("Subprocess returncode != 0 for mountSubvol() method. Exiting Backup.")
+            sendmail("error", "Bytterfs", "Subprocess returncode != 0 for mountSubvol() method. Exiting Backup.")
+            sys.exit(0)
+        return True
+
+    def destUmount(self):
+        if self.sshHost == None or self.sshPort == None or self.sshKey == None:
+            localMntpoint = "%s%s" % ("/mnt/bytterfs/", self.snapshotName)
+            logDebug("Umounting %s" % (localMntpoint))
+            p1 = Popen(["sudo", "umount", localMntpoint], stdout=PIPE)
+            out, err = p1.communicate()
+            if p1.returncode != 0:
+                logError("Subprocess returncode != 0 for destUmount() method. Exiting Backup.")
+                sendmail("error", "Bytterfs", "Subprocess returncode != 0 for destUmount() method. Exiting Backup.")
+                sys.exit(0)
+            logDebug(out.decode('utf-8'))
+
+    def destMountedContainerPath(self, localMntpoint, subvolID):
+        p1 = Popen(["sudo", "btrfs", "sub", "list", localMntpoint], stdout=PIPE)
+        out, err = p1.communicate()
+        if p1.returncode != 0:
+            logError("Subprocess returncode != 0 for mountSubvol() method. Exiting Backup.")
+            sendmail("error", "Bytterfs", "Subprocess returncode != 0 for mountSubvol() method. Exiting Backup.")
+            sys.exit(0)
+        splitRows = out.decode('latin-1').split("\n")
+        destMountedContainerPath = None
+        col = list()
+        for row in splitRows:
+            cols = row.split(" ")
+            logDebug("cols: %s" % cols)
+            if cols[1] == subvolID:
+                logDebug(cols[1])
+                destMountedContainerPath = cols[8:][0]
+                break
+        logDebug(destMountedContainerPath)
+        if destMountedContainerPath:
+            return destMountedContainerPath
+        else:
+            logError("Didn't find subvolID %s in localMntpoint: %s" % (subvolID, localMntpoint))
+            sendmail("error", "Bytterfs", "Didn't find subvolID %s in localMntpoint: %s" % (subvolID, localMntpoint))
+            sys.exit(0)
+
     def run(self):
         """Performs backup run."""
         logInfo("Source entered: %s" % self.source)
         logInfo("destContainer entered: %s" % self.destContainer)
         logInfo('Preparing environment')
+        if self.sshHost == None or self.sshPort == None or self.sshKey == None:
+            localMntpoint = "%s%s" % ("/mnt/bytterfs/", self.snapshotName)
+            mkdir_p(localMntpoint)
+            devPath = self.destDevPath()
+            if self.destMountSubvol(devPath, localMntpoint):
+                destRelMountedContainerPath = self.destMountedContainerPath(localMntpoint, self.destSubvolID())
+                self.destRootSubvol = "%s/" % localMntpoint
+                destAbsMountedCountainerPath = os.path.join(localMntpoint, destRelMountedContainerPath)
+                self.destContainer = "%s/" % destAbsMountedCountainerPath
+                self.isLockfile()
+                self.destKeepSnapshots()
+                logInfo('initiateBackup() locally.')
+                self.initiateBackup()
+            else:
+                sys.exit(0)
         self.destHasContainer()
         self.isLockfile()
         self.destKeepSnapshots()
         logInfo('initiateBackup()')
         self.initiateBackup()
 
-#### Initializing Logger
-logger = logging.getLogger()
-# Add ColoredConsoleHandler
-logger.addHandler(ColoredConsoleHandler())  # logger.addHandler(logging.StreamHandler(sys.stdout))
-# Add SysLogHandler
+
+#### Main
+logger = logging.getLogger()  # Initializing Logger
+logger.addHandler(ColoredConsoleHandler())
 log_syslog_handler = logging.handlers.SysLogHandler('/dev/log')  # /dev/log is the socket to log to syslog
 log_syslog_handler.setFormatter(logging.Formatter(app_name + '[%(process)d] %(message)s'))
-logger.addHandler(log_syslog_handler)
+logger.addHandler(log_syslog_handler)  # Add SysLogHandler
 logger.info('%s v%s by %s' % (app_name, __version__, __author__))
 
 try:
@@ -519,11 +636,14 @@ try:
                              "destinationContainer is existent on the destination root subvolume.")
     parser.add_argument('destContainer', type=checkPath, help="Destination container subvolume path, where snapshots "
                                                               "are send to.")
-    parser.add_argument('sshHost', type=str, help='E.g.: user@192.168.1.100.')
-    parser.add_argument('-p', '--sshPort', type=str, help='SSH Port.', required=True)
+    parser.add_argument('-l', '--local', action='store_true', help='If this switch is used, then ssh parameters will be'
+                                                                   'ignored and the backup transfer will run locally',
+                        required=False)
+    parser.add_argument('-s', '--sshHost', type=str, help='E.g.: user@192.168.1.100.', required=False)
+    parser.add_argument('-p', '--sshPort', type=str, help='SSH Port.', required=False)
+    parser.add_argument('-i', '--sshKey', type=str, help='Path to your private key for your SSH user.', required=False)
     parser.add_argument('-vv', '--debug', action='store_true', help='Log level: debug', required=False)
     parser.add_argument('-v', '--info', action='store_true', help='Log level: info', required=False)
-    parser.add_argument('-i', '--sshKey', type=str, help='Path to your private key for your SSH user.', required=True)
     parser.add_argument('-dk', '--destKeep', type=checkTimespan,
                         help="Maximum number of destination snapshots to keep for a specific amount of time. Syntax "
                              "example: 5w=6,4m=3,6m=2,12m=3. Which means that at maximum 6 snapshots will be kept of "
@@ -534,11 +654,10 @@ try:
                              "ts>optional(<comma as delimiter>)... Notice that the next specified time span has to be "
                              "greater than the previous, else the parameter will yield an error.", required=True)
     args = parser.parse_args()
-    # Add fileHandler
-    logPath = "%s%s" % ("/var/log/", app_name)
+    logPath = "%s%s" % ("/var/log/", app_name)  # Add fileHandler
     mkdir_p(logPath)
     logFormatter = logging.Formatter("%(asctime)s [%(levelname)-5.5s]  %(message)s")
-    fileHandler = logging.FileHandler("{0}/{1}.log".format(logPath, args.snapshotName))  # {0}{1} used with format(logPath,...)
+    fileHandler = logging.FileHandler("{0}/{1}.log".format(logPath, args.snapshotName))  # {0}{1} for format(logPath,..)
     fileHandler.setFormatter(logFormatter)
     logger.addHandler(fileHandler)
     if args.debug:
@@ -547,6 +666,14 @@ try:
         logger.setLevel(logging.INFO)
     else:
         logger.setLevel(logging.ERROR)
+    if args.local is True:
+        args.sshHost = None
+        args.sshPort = None
+        args.sshKey = None
+    else:
+        if args.sshPort is None or args.sshPort is None or args.sshKey is None:
+            logError("SSH parameter missing")
+            sys.exit()
     bytterfs = Bytterfs(args.snapshotName, args.source, args.destRootSubvol, args.destContainer,
                         args.destKeep, args.sshHost, args.sshPort, args.sshKey)
     bytterfs.run()
